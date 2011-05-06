@@ -1,0 +1,48 @@
+name: Toolbox
+main: com.bloodchild.bukkit.ToolboxPlugin
+version: 1.0
+website: http://www.eikefoken.de
+author: sturmkeyser
+description: Toolbox for duplicating and painting blocks
+commands:
+  clear:
+    description: Clears your inventory
+    usage: |
+           /<command>
+  compact:
+    description: Compacts your inventory
+    usage: |
+           /<command>
+  more:
+    aliases: [m]
+    description: Gives you more of the item in your hand
+    usage: |
+           /<command> [stacks]  
+  pick:
+    aliases: [p]
+    description: Sets the data value of the item in your hand
+    usage: |
+           /<command> [value]
+  duplicator:
+    aliases: [duper]
+    description: Gives you the duplicator tool
+    usage: |
+           /<command> 
+  paintbrush:
+    aliases: [painter]
+    description: Gives you the paintbrush tool
+    usage: |
+           /<command>
+  datawrench:
+    aliases: [scroller]
+    description: Gives you the data scroller tool
+    usage: |
+           /<command>
+  tools:
+    description: Gives you the duplicator, data scroller and paintbrush tools
+    usage: |
+           /<command>
+  boxreload:
+    description: Reloads the configuration file
+    usage: |
+           /<command>
