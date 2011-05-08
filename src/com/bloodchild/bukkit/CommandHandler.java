@@ -8,8 +8,6 @@ public class CommandHandler {
 
 	private static final int MAX_STACKS = 36;
 
-	//private static int[] unmimicable = { 0, 1, 2, 3, 66, 7, 8, 9, 10, 79, 11, 12, 46, 13, 51 };
-
 	/**
 	 * Clears the player's inventory.
 	 * 

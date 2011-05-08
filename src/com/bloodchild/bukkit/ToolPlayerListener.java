@@ -1,58 +1,118 @@
 package com.bloodchild.bukkit;
 
+import org.bukkit.ChatColor;
+import org.bukkit.event.Event;
+import org.bukkit.event.Event.Priority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.PluginManager;
 
+/**
+ * Handles all events thrown in a relation to a player.
+ * 
+ * @author sturmkeyser
+ */
 public class ToolPlayerListener extends PlayerListener {
 
-	public static ToolboxPlugin plugin;
+	/**
+	 * Contains the plug-in instance.
+	 */
+	private ToolboxPlugin plugin;
 
-	public ToolPlayerListener(ToolboxPlugin instance) {
-		plugin = instance;
+	/**
+	 * Constructs the object.
+	 * 
+	 * @param plugin
+	 */
+	public ToolPlayerListener(ToolboxPlugin plugin) {
+		this.plugin = plugin;
 	}
 
-	public void onPlayerQuit(PlayerQuitEvent event) {
-		ToolHandler.removePlayerBlock(event.getPlayer());
+	/**
+	 * Registers the required events.
+	 */
+	public void registerEvents() {
+		PluginManager pm = plugin.getServer().getPluginManager();
+		pm.registerEvent(Event.Type.PLAYER_INTERACT, this, Priority.Normal, plugin);
+		pm.registerEvent(Event.Type.PLAYER_QUIT, this, Priority.Normal, plugin);
 	}
 
+	/**
+	 * Called when a player interacts with an item.
+	 * 
+	 * @param event Relevant event details
+	 */
+	@Override
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getPlayer().getItemInHand().getTypeId() == ToolHandler.duplicatorTool) {
-				// this functionality has been moved to the data tool
-			} else if (event.getPlayer().getItemInHand().getTypeId() == ToolHandler.paintbrushTool) {
-				// paintbrush tool
+			if (event.getPlayer().getItemInHand().getTypeId() == ToolHandler.paintbrushTool) {
+				/*
+				 * Paintbrush tool
+				 */
 				if (ToolPermissions.canUsePaintbrushTool(event.getPlayer())) {
 					event.setCancelled(true);
 					ToolHandler.copyBlock(event.getPlayer(), event.getClickedBlock());
 				}
 			} else if (event.getPlayer().getItemInHand().getTypeId() == ToolHandler.scrollerTool) {
-				// data tool
+				/*
+				 * Data tool
+				 */
 				if (ToolPermissions.canUseScrollerTool(event.getPlayer())) {
-					event.setCancelled(true);
-					ToolHandler.handleScrollTool(event.getPlayer(), event.getClickedBlock());
+					if (RegionHandler.canBuildHere(event.getPlayer(), event.getClickedBlock())) {
+						event.setCancelled(true);
+						ToolHandler.handleScrollTool(event.getPlayer(), event.getClickedBlock());
+					} else {
+						event.getPlayer().sendMessage(ChatColor.DARK_RED + "Using that tools is not allowed in this area.");
+					}
 				}
 			}
 		} else if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			if (event.getPlayer().getItemInHand().getTypeId() == ToolHandler.duplicatorTool) {
-				// duplicator tool
+				/*
+				 * Duplication tool
+				 */
 				if (ToolPermissions.canUseDuplicatorTool(event.getPlayer())) {
 					event.setCancelled(true);
 					ToolHandler.handleDuplicatorTool(event.getPlayer(), event.getClickedBlock());
 				}
 			} else if (event.getPlayer().getItemInHand().getTypeId() == ToolHandler.paintbrushTool) {
+				/*
+				 * Paintbrush tool
+				 */
 				if (ToolPermissions.canUsePaintbrushTool(event.getPlayer())) {
-					event.setCancelled(true);
-					ToolHandler.paintBlock(event.getPlayer(), event.getClickedBlock());
+					if (RegionHandler.canBuildHere(event.getPlayer(), event.getClickedBlock())) {
+						event.setCancelled(true);
+						ToolHandler.paintBlock(event.getPlayer(), event.getClickedBlock());
+					} else {
+						event.getPlayer().sendMessage(ChatColor.DARK_RED + "Using that tools is not allowed in this area.");
+					}
 				}
 			} else if (event.getPlayer().getItemInHand().getTypeId() == ToolHandler.scrollerTool) {
+				/*
+				 * Data cycler tool
+				 */
 				if (ToolPermissions.canUseScrollerTool(event.getPlayer())) {
-					event.setCancelled(true);
-					ToolHandler.handleScrollTool(event.getPlayer(), event.getClickedBlock(), true);
+					if (RegionHandler.canBuildHere(event.getPlayer(), event.getClickedBlock())) {
+						event.setCancelled(true);
+						ToolHandler.handleScrollTool(event.getPlayer(), event.getClickedBlock(), true);
+					} else {
+						event.getPlayer().sendMessage(ChatColor.DARK_RED + "Using that tools is not allowed in this area.");
+					}
 				}
 			}
 		}
+	}
+
+	/**
+	 * Called when a player leaves a server.
+	 * 
+	 * @param event Relevant event details
+	 */
+	@Override
+	public void onPlayerQuit(PlayerQuitEvent event) {
+		ToolHandler.removePlayerBlock(event.getPlayer());
 	}
 
 }

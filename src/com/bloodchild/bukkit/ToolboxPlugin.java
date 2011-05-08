@@ -9,16 +9,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Priority;
-import org.bukkit.event.Event;
 import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 
 public class ToolboxPlugin extends JavaPlugin {
-
-	private final ToolPlayerListener playerListener = new ToolPlayerListener(this);
 
 	private static final Logger log = Logger.getLogger("Minecraft");
 
@@ -35,22 +30,26 @@ public class ToolboxPlugin extends JavaPlugin {
 				+ pdfFile.getVersion() + " is disabled!");
 	}
 
+	/**
+	 * Called on plug-in enable.
+	 */
 	@Override
 	public void onEnable() {
 		PluginDescriptionFile pdfFile = this.getDescription();
 		name = pdfFile.getName();
-		config = getConfiguration();
 
 		log.info("[" + name + "] " + name + " version " + pdfFile.getVersion() + " is enabled!");
 
-		ToolPermissions.init(getServer()); // init permissions
+		// load the configuration
+		config = getConfiguration();
+		loadConfig();
 
-		loadConfig(); // load config file
+		// load permissions
+		ToolPermissions.init(getServer(), name, log);
+		RegionHandler.init(getServer(), name, log);
 
 		// register events
-		PluginManager pm = getServer().getPluginManager();
-		pm.registerEvent(Event.Type.PLAYER_INTERACT, this.playerListener, Priority.Normal, this);
-		pm.registerEvent(Event.Type.PLAYER_QUIT, this.playerListener, Event.Priority.Normal, this);
+		(new ToolPlayerListener(this)).registerEvents();
 	}
 
 	public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
@@ -135,8 +134,8 @@ public class ToolboxPlugin extends JavaPlugin {
 		return true;
 	}
 
-	/*
-	 * Loads the config file data into appropriate places
+	/**
+	 * Loads the configuration file data into appropriate places.
 	 */
 	public void loadConfig() {
 		ToolboxUtils.duplicatableBlocks.clear();
@@ -204,10 +203,10 @@ public class ToolboxPlugin extends JavaPlugin {
 		log.info("[" + name + "] Config file loaded!");
 	}
 
-	/*
-	 * If the config file doesn't exist already, this attempts to create it
+	/**
+	 * Saves the configuration to file.
 	 */
-	public final void saveConfig() {
+	public void saveConfig() {
 		config.setProperty("duplicatorTool", ToolHandler.duplicatorTool);
 		config.setProperty("paintbrushTool", ToolHandler.paintbrushTool);
 		config.setProperty("scrollerTool", ToolHandler.scrollerTool);

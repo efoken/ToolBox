@@ -1,5 +1,7 @@
 package com.bloodchild.bukkit;
 
+import java.util.logging.Logger;
+
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
 
@@ -11,12 +13,12 @@ public class ToolPermissions {
 
 	public static PermissionHandler handler;
 
-	public static void init(Server server) {
+	public static void init(Server server, String pluginName, Logger log) {
 		Plugin permissions = server.getPluginManager().getPlugin("Permissions");
 
 		if (permissions != null) {
 			handler = ((Permissions) permissions).getHandler();
-			// log.info("Using Permissions");
+			log.info("[" + pluginName + "] Using Permissions");
 		}
 	}
 
@@ -29,6 +31,10 @@ public class ToolPermissions {
 	 * @return
 	 */
 	private static boolean hasPermission(Player player, String permission, boolean defaultPermission) {
+		if (player.isOp()) {
+			return true;
+		}
+
 		if (handler != null) {
 			return handler.has(player, permission);
 		} else {
