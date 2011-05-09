@@ -1,58 +1,157 @@
 package com.bloodchild.bukkit;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 public class CommandHandler {
-
-	private static final int MAX_STACKS = 36;
 
 	/**
 	 * Clears the player's inventory.
 	 * 
 	 * @param player
+	 * @param args
 	 * @return True on success
 	 */
-	public static boolean handleClearCommand(Player player) {
-		player.getInventory().clear();
-		player.sendMessage("Inventory cleared!");
+	public static boolean handleClearCommand(Player player, String[] args) {
+		PlayerInventory inventory = player.getInventory();
+
+		int first = 9;
+		int last = inventory.getSize();
+
+		if (args.length > 0) {
+			if (args[0].trim().equalsIgnoreCase("all")) {
+				first = 0;
+			} else if (args[0].trim().equalsIgnoreCase("main")) {
+				first = 9;
+			} else if (args[0].trim().equalsIgnoreCase("bar")) {
+				first = 0;
+				last = 9;
+			}
+		}
+
+		for (int i = first; i < last; i++) {
+			inventory.clear(i);
+		}
+
+		player.sendMessage(ChatColor.GREEN + "Inventory cleared!");
 		return true;
 	}
 
 	/**
+	 * Mimicks the nearby blocks in the player's inventory.
 	 * 
 	 * @param player
 	 * @param args
-	 * @return
-	 *\/
-	public static boolean handleNearCommand(Player player, String[] args) {
-		int radius = 10;
-		HashSet<Material> give = new HashSet<Material>();
+	 * @return True on success
+	 */
+	public static boolean handleMimicCommand(Player player, String[] args) {
+		int radius = 30;
 
 		if (args.length > 0) {
-			radius = Integer.parseInt(args[0]);
+			try { // make sure that a number is given
+				radius = Integer.parseInt(args[0].trim());
+			} catch (NumberFormatException e) {
+				radius = 30;
+			}
+		}
+		if (radius > ToolboxUtils.mimicRadius) {
+			radius = ToolboxUtils.mimicRadius;
+			player.sendMessage(ChatColor.RED + "Radius too large. Reset to maximum of "
+					+ ToolboxUtils.mimicRadius);
 		}
 
 		Location location = player.getLocation();
-		for (int x = location.getBlockX() - radius; x <= location.getBlockX() + radius; x++) {
-			for (int y = location.getBlockY() - radius; y <= location.getBlockY() + radius; y++) {
-				for (int z = location.getBlockZ() - radius; z <= location.getBlockZ() + radius; z++) {
-					Block block = player.getWorld().getBlockAt(x, y, z);
-					give.add(block.getType());
+		PlayerInventory inventory = player.getInventory();
+		World world = player.getWorld();
+		Block block;
+
+		int blocks[][] = new int[95][16];
+		int xPos = location.getBlockX();
+		int yPos = -1;
+		if (location.getBlockY() - radius / 5 > 0) {
+			yPos = location.getBlockY() - radius / 5;
+		} else {
+			yPos = location.getBlockY();
+		}
+		int zPos = location.getBlockZ();
+
+		for (int x = radius; x >= 0; x--) {
+			for (int y = radius; y >= 0; y--) {
+				for (int z = radius; z >= 0; z--) {
+					if (Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2) > Math.pow(
+							(double) radius + 0.5, 2)) {
+						continue;
+					}
+					block = world.getBlockAt(xPos + x, yPos + y, zPos + z);
+					blocks[block.getTypeId()][block.getData() > 15 ? 15 : block.getData()]++;
+					block = world.getBlockAt(xPos + x, yPos + y, zPos - z);
+					blocks[block.getTypeId()][block.getData() > 15 ? 15 : block.getData()]++;
+					block = world.getBlockAt(xPos - x, yPos + y, zPos + z);
+					blocks[block.getTypeId()][block.getData() > 15 ? 15 : block.getData()]++;
+					block = world.getBlockAt(xPos - x, yPos + y, zPos - z);
+					blocks[block.getTypeId()][block.getData() > 15 ? 15 : block.getData()]++;
 				}
 			}
 		}
 
-		Iterator<Material> itr = give.iterator();
-		while (itr.hasNext()) {
-			Material item = itr.next();
-			if (!Arrays.asList(unmimicable).contains(item.getId())) {
-				player.sendMessage(String.valueOf(item.getId()));
-				ItemStack stack = new ItemStack(item, 64);
-				player.getInventory().addItem(stack);
+		for (int k = 0; k <= 94; k++) {
+			if (!ToolboxUtils.isMimicableBlock(k)) {
+				for (int l = 0; l <= 15; l++) {
+					blocks[k][l] = 0;
+				}
 			}
 		}
+
+		int sum = 0;
+		for (int k = 0; k <= 94; k++) {
+			if (k != 66 && k != 18 && k != 84 && k != 61 && k != 62 && k != 55 && k != 92 && k != 8
+					&& k != 10 && k != 23 && k != 25 && k != 26 && k != 46 && k != 50 && k != 51
+					&& k != 52 && k != 53 && k != 54 && k != 63 && k != 64 && k != 65 && k != 67
+					&& k != 68 && k != 69 && k != 71 && k != 75 && k != 76 && k != 77 && k != 85
+					&& k != 86 && k != 91 && k != 93 && k != 94 && k != 90 && k != 70 && k != 72) {
+				continue;
+			}
+			sum = 0;
+			for (int l = 0; l <= 15; l++) {
+				sum += blocks[k][l];
+				blocks[k][l] = 0;
+			}
+			blocks[k][0] = sum;
+		}
+
+		for (int i = 0, max = 0, item = 0, data = 0; i <= 17; i++) {
+			max = 0;
+			item = 0;
+			data = 0;
+
+			for (int j = 1; j <= 94; j++) {
+				for (int m = 0; m <= 15; m++) {
+					if (blocks[j][m] > max) {
+						max = blocks[j][m];
+						item = j;
+						data = m;
+					}
+				}
+			}
+
+			if (item != 0) {
+				ItemStack stack = inventory.getItem(i + 9);
+				stack.setTypeId(item);
+				stack.setAmount(64);
+				stack.setDurability((short) data);
+				inventory.setItem(i + 9, stack);
+				blocks[item][data] = 0;
+			} else {
+				break;
+			}
+		}
+
+		player.sendMessage(ChatColor.LIGHT_PURPLE + "Environment mimicked in inventory.");
 		return true;
 	}
 
@@ -118,8 +217,10 @@ public class CommandHandler {
 	}
 
 	/**
-	 * Handles the /more command Finishes the player's current stack, and gives
-	 * them the specified number more stacks.
+	 * Handles the /more command.
+	 * 
+	 * Finishes the player's current stack, and gives them the specified number
+	 * more stacks.
 	 * 
 	 * @param player
 	 * @param args
@@ -129,32 +230,37 @@ public class CommandHandler {
 		int numStacks = 1;
 
 		if (args.length > 0) {
-			try {
+			try { // make sure that a number is given
 				numStacks = Integer.parseInt(args[0].trim());
-			} catch (Exception e) {
+			} catch (NumberFormatException e) {
 				numStacks = 1;
 			}
 		}
 
 		if (player.getItemInHand().getTypeId() != 0) {
-			if (player.getItemInHand().getAmount() < 64) {
-				player.getItemInHand().setAmount(64);
-				numStacks--;
-			}
-			if (numStacks > 0) {
-				giveStack(player, player.getItemInHand(), numStacks);
-			}
+			if (!ToolHandler.isTool(player.getItemInHand().getTypeId())) {
+				if (player.getItemInHand().getAmount() < 64) {
+					player.getItemInHand().setAmount(64);
+					numStacks--;
+				}
+				if (numStacks > 0) {
+					giveStack(player, player.getItemInHand(), numStacks);
+				}
 
-			player.sendMessage("Here you've got some more " + player.getItemInHand().getType());
-			return true;
-		} else {
-			return false;
+				player.sendMessage("Here you've got some more " + player.getItemInHand().getType());
+				return true;
+			} else {
+				player.sendMessage(ChatColor.RED + "Tools are not able to be duplicated.");
+			}
 		}
+		return false;
 	}
 
 	/**
-	 * Handles the /pick command - /pick <#> Attempts to set the data value of
-	 * whatever the player is holding to the specified number.
+	 * Handles the /pick command
+	 * 
+	 * Attempts to set the data value of whatever the player is holding to the
+	 * specified number.
 	 * 
 	 * @param player
 	 * @param args
@@ -167,7 +273,7 @@ public class CommandHandler {
 			if (args.length > 0) {
 				try {
 					newDataValue = Integer.parseInt(args[0].trim());
-				} catch (Exception e) {
+				} catch (NumberFormatException e) {
 					newDataValue = 0;
 				}
 
@@ -225,9 +331,9 @@ public class CommandHandler {
 	 * Gives the player the specified number of stacks of a given item.
 	 */
 	public static boolean giveStack(Player player, ItemStack stack, int numStacks) {
-		if (numStacks > MAX_STACKS) {
+		if (numStacks > player.getInventory().getSize()) {
 			// number of stacks should exceed the inventory space
-			numStacks = MAX_STACKS;
+			numStacks = player.getInventory().getSize();
 		}
 
 		for (int x = 0; x < numStacks; x++) {

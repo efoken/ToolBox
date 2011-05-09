@@ -55,8 +55,8 @@ public class ToolPermissions {
 	 * 
 	 * @param player
 	 * @return
-	 *\/
-	public static boolean canUseNearCommand(Player player) {
+	 */
+	public static boolean canUseMimicCommand(Player player) {
 		return hasPermission(player, "toolbox.commands.mimic", true);
 	}
 

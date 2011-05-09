@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -23,6 +22,9 @@ public class ToolboxPlugin extends JavaPlugin {
 
 	public String name;
 
+	/**
+	 * Called on plug-in disable.
+	 */
 	@Override
 	public void onDisable() {
 		PluginDescriptionFile pdfFile = this.getDescription();
@@ -52,57 +54,47 @@ public class ToolboxPlugin extends JavaPlugin {
 		(new ToolPlayerListener(this)).registerEvents();
 	}
 
+	/**
+	 * 
+	 */
+	@Override
 	public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args) {
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
 
 			if ((commandLabel.equalsIgnoreCase("clear"))) {
 				if (ToolPermissions.canUseClearCommand(player)) {
-					CommandHandler.handleClearCommand(player);
-				} else {
-					player.sendMessage(ChatColor.RED + "No permission");
+					CommandHandler.handleClearCommand(player, args);
 				}
 			} else if ((commandLabel.equalsIgnoreCase("compact"))) {
 				if (ToolPermissions.canUseCompactCommand(player)) {
 					CommandHandler.handleCompactComment(player);
-				} else {
-					player.sendMessage(ChatColor.RED + "No permission");
 				}
-			} else if ((commandLabel.equalsIgnoreCase("near"))) {
-				/*if (DupePermissions.canUseNearCommand(player)) {
-					CommandHandler.handleNearCommand(player, args);
-				} else {
-					player.sendMessage(ChatColor.RED + "No permission");
-				}*/
+			} else if ((commandLabel.equalsIgnoreCase("mimic"))) {
+				if (ToolPermissions.canUseMimicCommand(player)) {
+					CommandHandler.handleMimicCommand(player, args);
+				}
 			} else if (commandLabel.equalsIgnoreCase("more") || commandLabel.equalsIgnoreCase("m")) {
 				if (ToolPermissions.canUseMoreCommand(player)) {
 					CommandHandler.handleMoreCommand(player, args);
-				} else {
-					player.sendMessage(ChatColor.RED + "No permission");
 				}
 			} else if (commandLabel.equalsIgnoreCase("pick") || commandLabel.equalsIgnoreCase("p")) {
 				if (ToolPermissions.canUsePickCommand(player)) {
 					CommandHandler.handlePickCommand(player, args);
-				} else {
-					player.sendMessage(ChatColor.RED + "No permission");
 				}
-			} else if (commandLabel.equalsIgnoreCase("duplicator") || commandLabel.equalsIgnoreCase("duper")) {
+			} else if (commandLabel.equalsIgnoreCase("duplicator")
+					|| commandLabel.equalsIgnoreCase("duper")) {
 				if (ToolPermissions.canUseDuplicatorTool(player)) {
 					CommandHandler.giveDuplicatorTool(player);
-				} else {
-					player.sendMessage(ChatColor.RED + "No permission");
 				}
-			} else if (commandLabel.equalsIgnoreCase("datawrench") || commandLabel.equalsIgnoreCase("scroller")) {
+			} else if (commandLabel.equalsIgnoreCase("scroller")) {
 				if (ToolPermissions.canUseScrollerTool(player)) {
 					CommandHandler.giveScrollerTool(player);
-				} else {
-					player.sendMessage(ChatColor.RED + "No permission");
 				}
-			} else if (commandLabel.equalsIgnoreCase("paintbrush") || commandLabel.equalsIgnoreCase("painter")) {
+			} else if (commandLabel.equalsIgnoreCase("paintbrush")
+					|| commandLabel.equalsIgnoreCase("painter")) {
 				if (ToolPermissions.canUsePaintbrushTool(player)) {
 					CommandHandler.givePaintbrushTool(player);
-				} else {
-					player.sendMessage(ChatColor.RED + "No permission");
 				}
 			} else if ((commandLabel.equalsIgnoreCase("tools"))) {
 				if (ToolPermissions.canUsePaintbrushTool(player)) {
@@ -120,8 +112,6 @@ public class ToolboxPlugin extends JavaPlugin {
 					player.sendMessage(this.getDescription().getFullName() + " reloaded!");
 					log.info("[" + name + "] Configuration file reloaded by "
 							+ player.getDisplayName());
-				} else {
-					player.sendMessage(ChatColor.RED + "No permission");
 				}
 			}
 		} else {
@@ -138,7 +128,9 @@ public class ToolboxPlugin extends JavaPlugin {
 	 * Loads the configuration file data into appropriate places.
 	 */
 	public void loadConfig() {
-		ToolboxUtils.duplicatableBlocks.clear();
+		ToolboxUtils.unduplicatableBlocks.clear();
+		ToolboxUtils.unmimicableBlocks.clear();
+		ToolboxUtils.scrollableBlocks.clear();
 		config.load();
 
 		int duplicatorToolId = ToolHandler.duplicatorTool;
@@ -183,9 +175,22 @@ public class ToolboxPlugin extends JavaPlugin {
 
 		for (Integer item : unduplicatable) {
 			if (item > 0) { // make sure that a valid number is given
-				ToolboxUtils.duplicatableBlocks.add(item.intValue());
+				ToolboxUtils.unduplicatableBlocks.add(item.intValue());
 			}
 		}
+
+		// 7 = bedrock, 8 & 9 = water, 10 & 11 = lava, 51 = fire, 79 = ice
+		List<Integer> unmimicable = config.getIntList("unmimicable", Arrays
+				.asList(new Integer[] { 0, 1, 2, 3, 66, 7, 8, 9, 10, 79, 11, 12, 46, 13, 51 }));
+
+		for (Integer item : unmimicable) {
+			if (item > 0) { // make sure that a valid number is given
+				ToolboxUtils.unmimicableBlocks.add(item.intValue());
+			}
+		}
+
+		// max radius for /mimic command
+		ToolboxUtils.mimicRadius = config.getInt("mimicRadius", 40);
 
 		// 17 = log, etc.
 		List<Integer> scrollable = config.getIntList(
@@ -210,7 +215,9 @@ public class ToolboxPlugin extends JavaPlugin {
 		config.setProperty("duplicatorTool", ToolHandler.duplicatorTool);
 		config.setProperty("paintbrushTool", ToolHandler.paintbrushTool);
 		config.setProperty("scrollerTool", ToolHandler.scrollerTool);
-		config.setProperty("unduplicatable", ToolboxUtils.duplicatableBlocks.toArray());
+		config.setProperty("unduplicatable", ToolboxUtils.unduplicatableBlocks.toArray());
+		config.setProperty("unmimicable", ToolboxUtils.unduplicatableBlocks.toArray());
+		config.setProperty("mimicRadius", Integer.valueOf(ToolboxUtils.mimicRadius));
 		config.setProperty("scrollable", ToolboxUtils.scrollableBlocks.toArray());
 		config.save();
 

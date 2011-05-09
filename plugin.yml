@@ -1,6 +1,6 @@
 name: Toolbox
 main: com.bloodchild.bukkit.ToolboxPlugin
-version: 1.1
+version: 1.2
 website: http://www.eikefoken.de
 author: sturmkeyser
 description: Toolbox for duplicating and painting blocks
@@ -22,7 +22,12 @@ commands:
     aliases: [p]
     description: Sets the data value of the item in your hand
     usage: |
-           /<command> [value]
+           /<command> <value>
+  mimic:
+    aliases: [p]
+    description: Matches your inventory to types of blocks around you
+    usage: |
+           /<command> [radius]
   duplicator:
     aliases: [duper]
     description: Gives you the duplicator tool

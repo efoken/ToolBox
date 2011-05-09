@@ -14,7 +14,11 @@ public class ToolboxUtils {
 			24, 25, 35, 41, 42, 43, 44, 45, 47, 48, 49, 53, 56, 57, 58, 60, 67, 73, 74, 80, 82, 84,
 			85, 86, 87, 88, 89, 91, 92 };
 
-	public static ArrayList<Integer> duplicatableBlocks = new ArrayList<Integer>();
+	public static ArrayList<Integer> unduplicatableBlocks = new ArrayList<Integer>();
+
+	public static ArrayList<Integer> unmimicableBlocks = new ArrayList<Integer>();
+	
+	public static int mimicRadius;
 
 	public static ArrayList<Integer> scrollableBlocks = new ArrayList<Integer>();
 
@@ -22,7 +26,19 @@ public class ToolboxUtils {
 	 * Checks to see if the item is on the allowed list
 	 */
 	public static boolean isDuplicatableBlock(int itemId) {
-		for (int block : duplicatableBlocks) {
+		for (int block : unduplicatableBlocks) {
+			if (block == itemId) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Checks to see if the item is on the allowed list
+	 */
+	public static boolean isMimicableBlock(int itemId) {
+		for (int block : unmimicableBlocks) {
 			if (block == itemId) {
 				return false;
 			}
@@ -36,10 +52,10 @@ public class ToolboxUtils {
 	public static boolean isScrollableBlock(int itemId) {
 		for (int block : scrollableBlocks) {
 			if (block == itemId) {
-				return false;
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	/**
