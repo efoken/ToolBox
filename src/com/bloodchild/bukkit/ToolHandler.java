@@ -24,6 +24,10 @@ public class ToolHandler {
 		}
 	}
 
+	public static boolean isTool(int itemId) {
+		return itemId == duplicatorTool || itemId == scrollerTool || itemId == paintbrushTool;
+	}
+
 	public final static void copyBlock(Player player, Block block) {
 		if (ToolboxUtils.isPaintableBlock(block)) {
 			removePlayerBlock(player);
