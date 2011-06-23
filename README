@@ -1,0 +1,10 @@
+Toolbox is a plugin for creative servers. It implements a paintbrush and a
+duplication tool, a data value cycler and a super pickaxe. There is also a
+chance, to make some (configurable) tools invincible.
+
+The plugin features commands for:
+
+* Give some more of the item in the players hand
+* Change the data value of the item in the players hand
+* Clear and compact the players inventory
+* Much more
