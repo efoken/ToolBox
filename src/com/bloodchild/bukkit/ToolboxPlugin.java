@@ -1,8 +1,5 @@
 package com.bloodchild.bukkit;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
 import java.util.logging.Logger;
 
 import org.bukkit.command.Command;
@@ -17,8 +14,6 @@ public class ToolboxPlugin extends JavaPlugin {
 	private static final Logger log = Logger.getLogger("Minecraft");
 
 	private Configuration config;
-
-	public static Properties configSettings = new Properties();
 
 	public String name;
 
@@ -52,6 +47,7 @@ public class ToolboxPlugin extends JavaPlugin {
 
 		// register events
 		(new ToolPlayerListener(this)).registerEvents();
+		(new ToolBlockListener(this)).registerEvents();
 	}
 
 	/**
@@ -82,12 +78,18 @@ public class ToolboxPlugin extends JavaPlugin {
 				if (ToolPermissions.canUsePickCommand(player)) {
 					CommandHandler.handlePickCommand(player, args);
 				}
+			} else if (commandLabel.equalsIgnoreCase("superpickaxe")
+					|| commandLabel.equalsIgnoreCase("spa")) {
+				if (ToolPermissions.canUseSuperPickaxe(player)) {
+					CommandHandler.toggleSuperPickaxe(player);
+				}
 			} else if (commandLabel.equalsIgnoreCase("duplicator")
 					|| commandLabel.equalsIgnoreCase("duper")) {
 				if (ToolPermissions.canUseDuplicatorTool(player)) {
 					CommandHandler.giveDuplicatorTool(player);
 				}
-			} else if (commandLabel.equalsIgnoreCase("scroller")) {
+			} else if (commandLabel.equalsIgnoreCase("datawrench")
+					|| commandLabel.equalsIgnoreCase("scroller")) {
 				if (ToolPermissions.canUseScrollerTool(player)) {
 					CommandHandler.giveScrollerTool(player);
 				}
@@ -128,84 +130,65 @@ public class ToolboxPlugin extends JavaPlugin {
 	 * Loads the configuration file data into appropriate places.
 	 */
 	public void loadConfig() {
-		ToolboxUtils.unduplicatableBlocks.clear();
-		ToolboxUtils.unmimicableBlocks.clear();
-		ToolboxUtils.scrollableBlocks.clear();
 		config.load();
 
-		int duplicatorToolId = ToolHandler.duplicatorTool;
-		int paintbrushToolId = ToolHandler.paintbrushTool;
-		int scrollerToolId = ToolHandler.scrollerTool;
+		int duplicatorTool = config.getInt("duplicatorTool", 275);
+		int paintbrushTool = config.getInt("paintbrushTool", 341);
+		int scrollerTool = config.getInt("scrollerTool", 352);
 
-		// default duplicator tool is 275
-		duplicatorToolId = config.getInt("duplicatorTool", 275);
-
-		// default paintbrush tool is 341
-		paintbrushToolId = config.getInt("paintbrushTool", 341);
-
-		// default scroller tool is 352
-		scrollerToolId = config.getInt("scrollerTool", 352);
-
-		if (paintbrushToolId == duplicatorToolId) {
-			paintbrushToolId = ToolHandler.paintbrushTool;
-			duplicatorToolId = ToolHandler.duplicatorTool;
-
+		if (paintbrushTool == duplicatorTool) {
+			paintbrushTool = ToolHandler.paintbrushTool;
+			duplicatorTool = ToolHandler.duplicatorTool;
 			log.warning("Paintbrush tool and duplicator tool cannot be set to the same item, using defaults instead.");
 		}
-		if (paintbrushToolId == scrollerToolId) {
-			paintbrushToolId = ToolHandler.paintbrushTool;
-			scrollerToolId = ToolHandler.scrollerTool;
-
+		if (paintbrushTool == scrollerTool) {
+			paintbrushTool = ToolHandler.paintbrushTool;
+			scrollerTool = ToolHandler.scrollerTool;
 			log.warning("Paintbrush tool and scroller tool cannot be set to the same item, using defaults instead.");
 		}
-		if (duplicatorToolId == scrollerToolId) {
-			duplicatorToolId = ToolHandler.duplicatorTool;
-			scrollerToolId = ToolHandler.scrollerTool;
-
+		if (duplicatorTool == scrollerTool) {
+			duplicatorTool = ToolHandler.duplicatorTool;
+			scrollerTool = ToolHandler.scrollerTool;
 			log.warning("Duplicator tool and scroller tool cannot be set to the same item, using defaults instead.");
 		}
 
-		ToolHandler.duplicatorTool = duplicatorToolId;
-		ToolHandler.paintbrushTool = paintbrushToolId;
-		ToolHandler.scrollerTool = scrollerToolId;
+		ToolHandler.duplicatorTool = duplicatorTool;
+		ToolHandler.paintbrushTool = paintbrushTool;
+		ToolHandler.scrollerTool = scrollerTool;
 
-		// 7 = bedrock, 8 & 9 = water, 10 & 11 = lava, 51 = fire, 79 = ice
-		List<Integer> unduplicatable = config.getIntList("unduplicatable",
-				Arrays.asList(new Integer[] { 7, 8, 9, 10, 11, 51, 52, 79 }));
+		CommandHandler.mimicRadius = config.getInt("mimicRadius", 40);
 
-		for (Integer item : unduplicatable) {
-			if (item > 0) { // make sure that a valid number is given
-				ToolboxUtils.unduplicatableBlocks.add(item.intValue());
+		// load blocks that are unduplicatable
+		String temp[] = config.getString("unduplicatable", "7,8,9,10,11,51,52,79").split(",");
+		for (String block : temp) {
+			if (!block.equals("")) {
+				BlockHandler.unduplicatableBlocks.put(Integer.parseInt(block), false);
+			}
+		}
+		// load blocks that are unmimicable
+		temp = config.getString("unmimicable", "0,1,2,3,7,8,9,10,11,12,13,46,51,66,79").split(",");
+		for (String block : temp) {
+			if (!block.equals("")) {
+				BlockHandler.unmimicableBlocks.put(Integer.parseInt(block), false);
+			}
+		}
+		// load blocks that are scrollable
+		temp = config.getString("scrollable", "17,18,23,25,26,35,43,44,53,61,63,65,66,67,68,69,77,86,81,91").split(",");
+		for (String block : temp) {
+			if (!block.equals("")) {
+				BlockHandler.scrollableBlocks.put(Integer.parseInt(block), true);
 			}
 		}
 
-		// 7 = bedrock, 8 & 9 = water, 10 & 11 = lava, 51 = fire, 79 = ice
-		List<Integer> unmimicable = config.getIntList("unmimicable", Arrays
-				.asList(new Integer[] { 0, 1, 2, 3, 66, 7, 8, 9, 10, 79, 11, 12, 46, 13, 51 }));
-
-		for (Integer item : unmimicable) {
-			if (item > 0) { // make sure that a valid number is given
-				ToolboxUtils.unmimicableBlocks.add(item.intValue());
-			}
-		}
-
-		// max radius for /mimic command
-		ToolboxUtils.mimicRadius = config.getInt("mimicRadius", 40);
-
-		// 17 = log, etc.
-		List<Integer> scrollable = config.getIntList(
-				"scrollable",
-				Arrays.asList(new Integer[] { 17, 18, 23, 25, 26, 35, 43, 44, 53, 61, 63, 65, 66,
-						67, 68, 69, 77, 86, 81, 91 }));
-
-		for (Integer item : scrollable) {
-			if (item > 0) { // make sure that a valid number is given
-				ToolboxUtils.scrollableBlocks.add(item.intValue());
+		// load tools that are invincible
+		temp = config.getString("invincibleTools", "278,284,285,286").split(",");
+		for (String block : temp) {
+			if (!block.equals("")) {
+				ToolHandler.invincibleTools.put(Integer.parseInt(block), true);
 			}
 		}
 
 		saveConfig();
-		log.info("[" + name + "] Config file loaded!");
 	}
 
 	/**
@@ -215,13 +198,37 @@ public class ToolboxPlugin extends JavaPlugin {
 		config.setProperty("duplicatorTool", ToolHandler.duplicatorTool);
 		config.setProperty("paintbrushTool", ToolHandler.paintbrushTool);
 		config.setProperty("scrollerTool", ToolHandler.scrollerTool);
-		config.setProperty("unduplicatable", ToolboxUtils.unduplicatableBlocks.toArray());
-		config.setProperty("unmimicable", ToolboxUtils.unduplicatableBlocks.toArray());
-		config.setProperty("mimicRadius", Integer.valueOf(ToolboxUtils.mimicRadius));
-		config.setProperty("scrollable", ToolboxUtils.scrollableBlocks.toArray());
-		config.save();
+		config.setProperty("mimicRadius", Integer.valueOf(CommandHandler.mimicRadius));
 
-		log.info("[" + name + "] Successfully created new config file");
+		// save block that are scrollable
+		StringBuilder sb = new StringBuilder();
+		for (Integer block : BlockHandler.scrollableBlocks.keySet()) {
+			sb.append(block).append(",");
+		}
+		config.setProperty("scrollable", sb.toString());
+
+		// save block that are unmimicable
+		sb = new StringBuilder();
+		for (Integer block : BlockHandler.unmimicableBlocks.keySet()) {
+			sb.append(block).append(",");
+		}
+		config.setProperty("unmimicable", sb.toString());
+
+		// save block that are unduplicatable
+		sb = new StringBuilder();
+		for (Integer block : BlockHandler.unduplicatableBlocks.keySet()) {
+			sb.append(block).append(",");
+		}
+		config.setProperty("unduplicatable", sb.toString());
+
+		// save tools that are invincible
+		sb = new StringBuilder();
+		for (Integer block : ToolHandler.invincibleTools.keySet()) {
+			sb.append(block).append(",");
+		}
+		config.setProperty("invincibleTools", sb.toString());
+
+		config.save();
 	}
 
 }

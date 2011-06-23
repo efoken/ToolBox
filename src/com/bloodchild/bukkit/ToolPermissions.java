@@ -14,9 +14,12 @@ public class ToolPermissions {
 	public static PermissionHandler handler;
 
 	public static void init(Server server, String pluginName, Logger log) {
+		Plugin groupManager = server.getPluginManager().getPlugin("GroupManager");
 		Plugin permissions = server.getPluginManager().getPlugin("Permissions");
 
-		if (permissions != null) {
+		if (groupManager != null) {
+			
+		} else if (permissions != null) {
 			handler = ((Permissions) permissions).getHandler();
 			log.info("[" + pluginName + "] Using Permissions");
 		}
@@ -112,6 +115,24 @@ public class ToolPermissions {
 	 */
 	public static boolean canUsePaintbrushTool(Player player) {
 		return hasPermission(player, "toolbox.tools.paintbrush", true);
+	}
+
+	/**
+	 * 
+	 * @param player
+	 * @return
+	 */
+	public static boolean canUseSuperPickaxe(Player player) {
+		return hasPermission(player, "toolbox.tools.superpickaxe", true);
+	}
+
+	/**
+	 * 
+	 * @param player
+	 * @return
+	 */
+	public static boolean canUseInvincibleTools(Player player) {
+		return hasPermission(player, "toolbox.tools.invincible", true);
 	}
 
 	/**

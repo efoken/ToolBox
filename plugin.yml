@@ -1,6 +1,6 @@
 name: Toolbox
 main: com.bloodchild.bukkit.ToolboxPlugin
-version: 1.2
+version: 1.2b
 website: http://www.eikefoken.de
 author: sturmkeyser
 description: Toolbox for duplicating and painting blocks
@@ -8,7 +8,7 @@ commands:
   clear:
     description: Clears your inventory
     usage: |
-           /<command>
+           /<command> [all|main|bar]
   compact:
     description: Compacts your inventory
     usage: |
@@ -41,6 +41,11 @@ commands:
   datawrench:
     aliases: [scroller]
     description: Gives you the data scroller tool
+    usage: |
+           /<command>
+  superpickaxe:
+    aliases: [spa]
+    description: Toggles the super pickaxe
     usage: |
            /<command>
   tools:

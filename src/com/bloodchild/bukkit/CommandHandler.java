@@ -10,6 +10,8 @@ import org.bukkit.inventory.PlayerInventory;
 
 public class CommandHandler {
 
+	protected static int mimicRadius = 40;
+
 	/**
 	 * Clears the player's inventory.
 	 * 
@@ -59,10 +61,10 @@ public class CommandHandler {
 				radius = 30;
 			}
 		}
-		if (radius > ToolboxUtils.mimicRadius) {
-			radius = ToolboxUtils.mimicRadius;
+		if (radius > mimicRadius) {
+			radius = mimicRadius;
 			player.sendMessage(ChatColor.RED + "Radius too large. Reset to maximum of "
-					+ ToolboxUtils.mimicRadius);
+					+ mimicRadius);
 		}
 
 		Location location = player.getLocation();
@@ -99,14 +101,6 @@ public class CommandHandler {
 			}
 		}
 
-		for (int k = 0; k <= 94; k++) {
-			if (!ToolboxUtils.isMimicableBlock(k)) {
-				for (int l = 0; l <= 15; l++) {
-					blocks[k][l] = 0;
-				}
-			}
-		}
-
 		int sum = 0;
 		for (int k = 0; k <= 94; k++) {
 			if (k != 66 && k != 18 && k != 84 && k != 61 && k != 62 && k != 55 && k != 92 && k != 8
@@ -122,6 +116,14 @@ public class CommandHandler {
 				blocks[k][l] = 0;
 			}
 			blocks[k][0] = sum;
+		}
+
+		for (int k = 0; k <= 94; k++) {
+			if (!BlockHandler.isMimicableBlock(k)) {
+				for (int l = 0; l <= 15; l++) {
+					blocks[k][l] = 0;
+				}
+			}
 		}
 
 		for (int i = 0, max = 0, item = 0, data = 0; i <= 17; i++) {
@@ -190,7 +192,7 @@ public class CommandHandler {
 
 					// check if the item has the same type
 					if (item.getTypeId() == item2.getTypeId()
-							&& (!ToolboxUtils.isScrollableBlock(item.getTypeId()) || item
+							&& (!BlockHandler.isScrollableBlock(item.getTypeId()) || item
 									.getDurability() == item2.getDurability())) {
 						if (item2.getAmount() > needed) {
 							item.setAmount(64);
@@ -315,6 +317,26 @@ public class CommandHandler {
 			if ((newDataValue <= maxData) && (newDataValue >= 0)) {
 				player.getItemInHand().setDurability((short) newDataValue);
 			}
+		}
+		return true;
+	}
+
+	/**
+	 * Toggles the super pickaxe.
+	 * 
+	 * @param player
+	 * @param args
+	 * @return
+	 */
+	public static boolean toggleSuperPickaxe(Player player) {
+		int hash = player.getName().hashCode();
+
+		if (ToolHandler.playersWithSuperPickaxe.contains(hash)) {
+			ToolHandler.playersWithSuperPickaxe.remove(hash);
+			player.sendMessage(ChatColor.GREEN + "Super pickaxe disabled!");
+		} else {
+			ToolHandler.playersWithSuperPickaxe.add(hash);
+			player.sendMessage(ChatColor.GREEN + "Super pickaxe enabled!");
 		}
 		return true;
 	}

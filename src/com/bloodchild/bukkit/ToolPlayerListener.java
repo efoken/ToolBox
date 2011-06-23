@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -37,6 +38,7 @@ public class ToolPlayerListener extends PlayerListener {
 		PluginManager pm = plugin.getServer().getPluginManager();
 		pm.registerEvent(Event.Type.PLAYER_INTERACT, this, Priority.Normal, plugin);
 		pm.registerEvent(Event.Type.PLAYER_QUIT, this, Priority.Normal, plugin);
+		pm.registerEvent(Event.Type.PLAYER_DROP_ITEM, this, Priority.Normal, plugin);
 	}
 
 	/**
@@ -47,7 +49,15 @@ public class ToolPlayerListener extends PlayerListener {
 	@Override
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (event.getPlayer().getItemInHand().getTypeId() == ToolHandler.paintbrushTool) {
+			if (event.getPlayer().getItemInHand().getTypeId() == ToolHandler.duplicatorTool) {
+				/*
+				 * Duplication tool
+				 */
+				if (ToolPermissions.canUseDuplicatorTool(event.getPlayer())) {
+					event.setCancelled(true);
+					ToolHandler.handleDuplicatorTool(event.getPlayer(), event.getClickedBlock(), 1);
+				}
+			} else if (event.getPlayer().getItemInHand().getTypeId() == ToolHandler.paintbrushTool) {
 				/*
 				 * Paintbrush tool
 				 */
@@ -113,6 +123,12 @@ public class ToolPlayerListener extends PlayerListener {
 	@Override
 	public void onPlayerQuit(PlayerQuitEvent event) {
 		ToolHandler.removePlayerBlock(event.getPlayer());
+	}
+
+	@Override
+	public void onPlayerDropItem(PlayerDropItemEvent event) {
+		event.setCancelled(true);
+		event.getItemDrop().remove();
 	}
 
 }

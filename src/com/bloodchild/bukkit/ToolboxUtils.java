@@ -1,62 +1,8 @@
 package com.bloodchild.bukkit;
 
-import java.util.ArrayList;
-
-import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 public class ToolboxUtils {
-
-	/*
-	 * These blocks play nicely with the paint tool
-	 */
-	private static int[] safeBlocks = { 1, 2, 3, 4, 5, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-			24, 25, 35, 41, 42, 43, 44, 45, 47, 48, 49, 53, 56, 57, 58, 60, 67, 73, 74, 80, 82, 84,
-			85, 86, 87, 88, 89, 91, 92 };
-
-	public static ArrayList<Integer> unduplicatableBlocks = new ArrayList<Integer>();
-
-	public static ArrayList<Integer> unmimicableBlocks = new ArrayList<Integer>();
-	
-	public static int mimicRadius;
-
-	public static ArrayList<Integer> scrollableBlocks = new ArrayList<Integer>();
-
-	/**
-	 * Checks to see if the item is on the allowed list
-	 */
-	public static boolean isDuplicatableBlock(int itemId) {
-		for (int block : unduplicatableBlocks) {
-			if (block == itemId) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Checks to see if the item is on the allowed list
-	 */
-	public static boolean isMimicableBlock(int itemId) {
-		for (int block : unmimicableBlocks) {
-			if (block == itemId) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Checks to see if the item is on the allowed list
-	 */
-	public static boolean isScrollableBlock(int itemId) {
-		for (int block : scrollableBlocks) {
-			if (block == itemId) {
-				return true;
-			}
-		}
-		return false;
-	}
 
 	/**
 	 * Translates an items ID into it's name.
@@ -145,16 +91,4 @@ public class ToolboxUtils {
 		return itemId;
 	}
 
-	public static boolean isPaintableBlock(Block block) {
-		return isPaintableBlock(block.getTypeId());
-	}
-
-	public static boolean isPaintableBlock(int blockId) {
-		for (int x : safeBlocks) {
-			if (x == blockId) {
-				return true;
-			}
-		}
-		return false;
-	}
 }
