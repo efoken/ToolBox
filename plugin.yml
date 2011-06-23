@@ -1,5 +1,5 @@
 name: Toolbox
-main: com.bloodchild.bukkit.ToolboxPlugin
+main: de.disposed.bukkit.toolbox.ToolboxPlugin
 version: 1.2b
 website: http://www.eikefoken.de
 author: sturmkeyser
