@@ -5,7 +5,10 @@ import org.bukkit.inventory.ItemStack;
 public class ToolboxUtils {
 
 	/**
-	 * Translates an items ID into it's name.
+	 * Translates an items ID to it's name.
+	 * 
+	 * @param itemId
+	 * @return
 	 */
 	public static String itemIdToName(int itemId) {
 		return (new ItemStack(itemId)).getType().toString();
@@ -14,6 +17,9 @@ public class ToolboxUtils {
 	/**
 	 * Checks to see if this item is one that has a special data value, to
 	 * determine if we should be copying its data field.
+	 * 
+	 * @param itemId
+	 * @return
 	 */
 	public static boolean isItemWithDataValue(int itemId) {
 		boolean value = false;
@@ -45,10 +51,57 @@ public class ToolboxUtils {
 	}
 
 	/**
+	 * Figures out the appropriate data values for the given item.
+	 * 
+	 * @param itemId
+	 * @return
+	 */
+	public static int getMaxDataValue(int itemId) {
+		int maxData = -1;
+
+		switch (itemId) {
+		case 6: // sapplings
+			maxData = 2;
+			break;
+		case 17: // logs
+			maxData = 2;
+			break;
+		case 18: // leaves
+			maxData = 2;
+			break;
+		case 35: // wool
+			maxData = 15;
+			break;
+		case 43: // double step
+			maxData = 3;
+			break;
+		case 44: // single step
+			maxData = 3;
+			break;
+		case 53: // wood step
+			maxData = 3;
+			break;
+		case 67: // stone step
+			maxData = 3;
+			break;
+		case 86:
+			maxData = 3;
+			break; // pumpkins (changes direction)
+		case 91:
+			maxData = 3;
+			break; // jack-o-lanterns (changes direction)
+		}
+		return maxData;
+	}
+
+	/**
 	 * Translates a blockID into an itemID for certain block types.
 	 * 
 	 * For example, a wooden door block's ID is 64, but we want to give the
 	 * player the item 324 instead.
+	 * 
+	 * @param blockId
+	 * @return
 	 */
 	public static int translateBlockToItemID(int blockId) {
 		int itemId = blockId;

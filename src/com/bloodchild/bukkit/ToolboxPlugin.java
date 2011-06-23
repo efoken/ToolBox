@@ -1,5 +1,7 @@
 package com.bloodchild.bukkit;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.logging.Logger;
 
 import org.bukkit.command.Command;
@@ -78,11 +80,6 @@ public class ToolboxPlugin extends JavaPlugin {
 				if (ToolPermissions.canUsePickCommand(player)) {
 					CommandHandler.handlePickCommand(player, args);
 				}
-			} else if (commandLabel.equalsIgnoreCase("superpickaxe")
-					|| commandLabel.equalsIgnoreCase("spa")) {
-				if (ToolPermissions.canUseSuperPickaxe(player)) {
-					CommandHandler.toggleSuperPickaxe(player);
-				}
 			} else if (commandLabel.equalsIgnoreCase("duplicator")
 					|| commandLabel.equalsIgnoreCase("duper")) {
 				if (ToolPermissions.canUseDuplicatorTool(player)) {
@@ -108,7 +105,7 @@ public class ToolboxPlugin extends JavaPlugin {
 				if (ToolPermissions.canUseDuplicatorTool(player)) {
 					CommandHandler.giveDuplicatorTool(player);
 				}
-			} else if ((commandLabel.equalsIgnoreCase("boxreload"))) {
+			} else if ((commandLabel.equalsIgnoreCase("tbreload"))) {
 				if (ToolPermissions.canReload(player)) {
 					loadConfig();
 					player.sendMessage(this.getDescription().getFullName() + " reloaded!");
@@ -117,7 +114,7 @@ public class ToolboxPlugin extends JavaPlugin {
 				}
 			}
 		} else {
-			if ((commandLabel.equalsIgnoreCase("boxreload"))) {
+			if ((commandLabel.equalsIgnoreCase("tbreload"))) {
 				loadConfig();
 				log.info("[" + name + "] Configuration file reloaded by console");
 			}
@@ -135,26 +132,19 @@ public class ToolboxPlugin extends JavaPlugin {
 		int duplicatorTool = config.getInt("duplicatorTool", 275);
 		int paintbrushTool = config.getInt("paintbrushTool", 341);
 		int scrollerTool = config.getInt("scrollerTool", 352);
+		int superPickaxe = config.getInt("superPickaxe", 274);
 
-		if (paintbrushTool == duplicatorTool) {
-			paintbrushTool = ToolHandler.paintbrushTool;
-			duplicatorTool = ToolHandler.duplicatorTool;
-			log.warning("Paintbrush tool and duplicator tool cannot be set to the same item, using defaults instead.");
-		}
-		if (paintbrushTool == scrollerTool) {
-			paintbrushTool = ToolHandler.paintbrushTool;
-			scrollerTool = ToolHandler.scrollerTool;
-			log.warning("Paintbrush tool and scroller tool cannot be set to the same item, using defaults instead.");
-		}
-		if (duplicatorTool == scrollerTool) {
-			duplicatorTool = ToolHandler.duplicatorTool;
-			scrollerTool = ToolHandler.scrollerTool;
-			log.warning("Duplicator tool and scroller tool cannot be set to the same item, using defaults instead.");
-		}
+		Integer[] array = new Integer[] { duplicatorTool, paintbrushTool, scrollerTool, superPickaxe };
+		HashSet<Integer> tools = new HashSet<Integer>(Arrays.asList(array));
 
-		ToolHandler.duplicatorTool = duplicatorTool;
-		ToolHandler.paintbrushTool = paintbrushTool;
-		ToolHandler.scrollerTool = scrollerTool;
+		if (tools.size() != 4) {
+			log.warning("[" + name + "] Some tools are conflicting, using defaults insted.");
+		} else {
+			ToolHandler.duplicatorTool = duplicatorTool;
+			ToolHandler.paintbrushTool = paintbrushTool;
+			ToolHandler.scrollerTool = scrollerTool;
+			ToolHandler.superPickaxe = superPickaxe;
+		}
 
 		CommandHandler.mimicRadius = config.getInt("mimicRadius", 40);
 
@@ -179,7 +169,6 @@ public class ToolboxPlugin extends JavaPlugin {
 				BlockHandler.scrollableBlocks.put(Integer.parseInt(block), true);
 			}
 		}
-
 		// load tools that are invincible
 		temp = config.getString("invincibleTools", "278,284,285,286").split(",");
 		for (String block : temp) {
@@ -195,9 +184,10 @@ public class ToolboxPlugin extends JavaPlugin {
 	 * Saves the configuration to file.
 	 */
 	public void saveConfig() {
-		config.setProperty("duplicatorTool", ToolHandler.duplicatorTool);
-		config.setProperty("paintbrushTool", ToolHandler.paintbrushTool);
-		config.setProperty("scrollerTool", ToolHandler.scrollerTool);
+		config.setProperty("duplicatorTool", Integer.valueOf(ToolHandler.duplicatorTool));
+		config.setProperty("paintbrushTool", Integer.valueOf(ToolHandler.paintbrushTool));
+		config.setProperty("scrollerTool", Integer.valueOf(ToolHandler.scrollerTool));
+		config.setProperty("superPickaxe", Integer.valueOf(ToolHandler.superPickaxe));
 		config.setProperty("mimicRadius", Integer.valueOf(CommandHandler.mimicRadius));
 
 		// save block that are scrollable

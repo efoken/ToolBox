@@ -1,7 +1,6 @@
 package com.bloodchild.bukkit;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 
 import org.bukkit.ChatColor;
@@ -17,8 +16,6 @@ public class ToolHandler {
 	public static int superPickaxe = 274;
 
 	public static HashMap<Integer, Boolean> invincibleTools = new HashMap<Integer, Boolean>();
-
-	public static HashSet<Integer> playersWithSuperPickaxe = new HashSet<Integer>();
 
 	private static int lastEmpty = -1;
 
@@ -102,41 +99,7 @@ public class ToolHandler {
 	 * @param reverse
 	 */
 	public final static void handleScrollTool(Player player, Block block, boolean reverse) {
-		int maxData = -1;
-
-		// check if this is a block that we want to modify
-		switch (block.getTypeId()) {
-		case 6:
-			maxData = 2;
-			break; // saplings
-		case 17:
-			maxData = 2;
-			break; // logs
-		case 18:
-			maxData = 2;
-			break; // leaves
-		case 35:
-			maxData = 15;
-			break; // wool
-		case 43:
-			maxData = 3;
-			break; // single steps
-		case 44:
-			maxData = 3;
-			break; // double steps
-		case 53:
-			maxData = 3;
-			break; // wooden stairs
-		case 67:
-			maxData = 3;
-			break; // cobblestone stairs
-		case 86:
-			maxData = 3;
-			break; // pumpkins (changes direction)
-		case 91:
-			maxData = 3;
-			break; // jack-o-lanterns (changes direction)
-		}
+		int maxData = ToolboxUtils.getMaxDataValue(block.getTypeId());
 
 		// if the blockID was on the list, go ahead and cycle it's data
 		if (maxData >= 0) {

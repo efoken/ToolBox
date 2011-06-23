@@ -43,16 +43,11 @@ commands:
     description: Gives you the data scroller tool
     usage: |
            /<command>
-  superpickaxe:
-    aliases: [spa]
-    description: Toggles the super pickaxe
-    usage: |
-           /<command>
   tools:
     description: Gives you the duplicator, data scroller and paintbrush tools
     usage: |
            /<command>
-  boxreload:
+  tbreload:
     description: Reloads the configuration file
     usage: |
            /<command>

@@ -103,11 +103,11 @@ public class CommandHandler {
 
 		int sum = 0;
 		for (int k = 0; k <= 94; k++) {
-			if (k != 66 && k != 18 && k != 84 && k != 61 && k != 62 && k != 55 && k != 92 && k != 8
-					&& k != 10 && k != 23 && k != 25 && k != 26 && k != 46 && k != 50 && k != 51
-					&& k != 52 && k != 53 && k != 54 && k != 63 && k != 64 && k != 65 && k != 67
-					&& k != 68 && k != 69 && k != 71 && k != 75 && k != 76 && k != 77 && k != 85
-					&& k != 86 && k != 91 && k != 93 && k != 94 && k != 90 && k != 70 && k != 72) {
+			if (k != 8 && k != 10 && k != 18 && k != 23 && k != 25 && k != 26 && k != 46 && k != 50
+					&& k != 51 && k != 52 && k != 53 && k != 54 && k != 55 && k != 61 && k != 62
+					&& k != 63 && k != 64 && k != 65 && k != 66 && k != 67 && k != 68 && k != 69
+					&& k != 70 && k != 71 && k != 72 && k != 75 && k != 76 && k != 77 && k != 84
+					&& k != 85 && k != 86 && k != 90 && k != 91 && k != 92 && k != 93 && k != 94) {
 				continue;
 			}
 			sum = 0;
@@ -281,62 +281,11 @@ public class CommandHandler {
 
 			}
 
-			/*
-			 * Check to see if we allow this block's data to be modified and
-			 * figure out the appropriate data values for it
-			 */
-			int maxData = -1;
-			switch (player.getItemInHand().getTypeId()) {
-			case 44:
-				maxData = 3;
-				break;
-			case 43:
-				maxData = 3;
-				break;
-			case 17:
-				maxData = 2;
-				break;
-			case 35:
-				maxData = 15;
-				break;
-			case 53:
-				maxData = 3;
-				break;
-			case 67:
-				maxData = 3;
-				break;
-			case 18:
-				maxData = 2;
-				break;
-			case 6:
-				maxData = 2;
-				break;
-			}
-
 			// if everything is alright, change the data value
-			if ((newDataValue <= maxData) && (newDataValue >= 0)) {
+			if ((newDataValue <= ToolboxUtils.getMaxDataValue(player.getItemInHand().getTypeId()))
+					&& (newDataValue >= 0)) {
 				player.getItemInHand().setDurability((short) newDataValue);
 			}
-		}
-		return true;
-	}
-
-	/**
-	 * Toggles the super pickaxe.
-	 * 
-	 * @param player
-	 * @param args
-	 * @return
-	 */
-	public static boolean toggleSuperPickaxe(Player player) {
-		int hash = player.getName().hashCode();
-
-		if (ToolHandler.playersWithSuperPickaxe.contains(hash)) {
-			ToolHandler.playersWithSuperPickaxe.remove(hash);
-			player.sendMessage(ChatColor.GREEN + "Super pickaxe disabled!");
-		} else {
-			ToolHandler.playersWithSuperPickaxe.add(hash);
-			player.sendMessage(ChatColor.GREEN + "Super pickaxe enabled!");
 		}
 		return true;
 	}

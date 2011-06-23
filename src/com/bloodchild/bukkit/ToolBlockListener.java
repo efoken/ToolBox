@@ -1,6 +1,5 @@
 package com.bloodchild.bukkit;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
@@ -36,7 +35,7 @@ public class ToolBlockListener extends BlockListener {
 	}
 
 	/**
-	 * Called when a block breaks.
+	 * Called when a block is destroyed by a player.
 	 * 
 	 * @param event Relevant event details
 	 */
@@ -53,16 +52,15 @@ public class ToolBlockListener extends BlockListener {
 				}
 			}
 		}
-		event.setCancelled(true); // no drops
-		event.getBlock().setType(Material.AIR);
 	}
 
 	/**
+	 * Called when a block is damaged (or broken).
 	 * 
+	 * @param event Relevant event details
 	 */
 	public void onBlockDamage(BlockDamageEvent event) {
-		if (!event.isCancelled()
-				&& ToolHandler.playersWithSuperPickaxe.contains(event.getPlayer().getName().hashCode())
+		if (!event.isCancelled() && ToolPermissions.canUseSuperPickaxe(event.getPlayer())
 				&& event.getItemInHand().getTypeId() == ToolHandler.superPickaxe) {
 			event.setInstaBreak(true);
 		}
