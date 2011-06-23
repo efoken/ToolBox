@@ -1,4 +1,4 @@
-package com.bloodchild.bukkit;
+package de.disposed.bukkit.toolbox;
 
 import java.util.HashMap;
 import java.util.Hashtable;

@@ -1,4 +1,4 @@
-package com.bloodchild.bukkit;
+package de.disposed.bukkit.toolbox;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;

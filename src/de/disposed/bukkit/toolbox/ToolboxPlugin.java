@@ -1,4 +1,4 @@
-package com.bloodchild.bukkit;
+package de.disposed.bukkit.toolbox;
 
 import java.util.Arrays;
 import java.util.HashSet;
